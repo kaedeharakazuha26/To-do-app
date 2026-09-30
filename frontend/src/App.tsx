@@ -1,122 +1,106 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { TaskForm } from './TaskForm';
+import type { Todo } from './types';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_URL = 'http://localhost:5000/api/todos';
+
+export default function App() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [filter, setFilter] = useState<'All' | 'Active' | 'Completed'>('All');
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((data) => setTodos(data))
+      .catch((err) => console.error('Error fetching todos:', err));
+  }, []);
+
+  const handleAddTask = async (title: string) => {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      const newTodo = await res.json();
+      setTodos((prev) => [newTodo, ...prev]);
+    } catch (err) {
+      console.error('Error adding todo:', err);
+    }
+  };
+
+  const handleToggle = async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, { method: 'PATCH' });
+      const updatedTodo = await res.json();
+      setTodos((prev) =>
+        prev.map((t) => (t._id === id ? updatedTodo : t))
+      );
+    } catch (err) {
+      console.error('Error toggling todo:', err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      setTodos((prev) => prev.filter((t) => t._id !== id));
+    } catch (err) {
+      console.error('Error deleting todo:', err);
+    }
+  };
+
+  const filteredTodos = todos.filter((todo) => {
+    if (filter === 'Active') return !todo.completed;
+    if (filter === 'Completed') return todo.completed;
+    return true;
+  });
+
+  const remainingCount = todos.filter((todo) => !todo.completed).length;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="container">
+      <h1>Task Manager</h1>
 
-      <div className="ticks"></div>
+      <TaskForm onAddTask={handleAddTask} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <div className="filter-group">
+        {(['All', 'Active', 'Completed'] as const).map((status) => (
+          <button
+            key={status}
+            onClick={() => setFilter(status)}
+            className={`btn-filter ${filter === status ? 'active' : ''}`}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <p className="counter">Active Tasks Remaining: {remainingCount}</p>
+
+      {filteredTodos.length === 0 ? (
+        <p className="empty-state">No tasks found.</p>
+      ) : (
+        <ul className="todo-list">
+          {filteredTodos.map((todo) => (
+            <li key={todo._id} className="todo-item">
+              <span
+                onClick={() => handleToggle(todo._id)}
+                className={`todo-title ${todo.completed ? 'completed' : ''}`}
+              >
+                {todo.title}
+              </span>
+              <button
+                onClick={() => handleDelete(todo._id)}
+                className="btn-delete"
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
-
-export default App
