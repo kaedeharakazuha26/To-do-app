@@ -67,8 +67,7 @@ capstone3/
 Make sure you have the following installed:
 
 -   [Node.js](https://nodejs.org/) (v18 or higher recommended)
--   [MongoDB](https://www.mongodb.com/) (Local server running or a
-    MongoDB Atlas URI)
+-   [MongoDB](https://www.mongodb.com/) (MongoDB Atlas URI)
 
 ### Setup & Installation
 
@@ -96,7 +95,7 @@ cd capstone3
 
     ``` env
     PORT=5000
-    MONGO_URI=mongodb://127.0.0.1:27017/todoapp
+    MONGO_URI=mongodb://127.0.0.1:27017/todoapp  replace this with your connection string then /todoapp
     ```
 
 4.  Start the backend server:
