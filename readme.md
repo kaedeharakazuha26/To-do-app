@@ -6,7 +6,7 @@ The application allows users to create, view, filter, toggle completion, and del
 
 ## 🌐 Live Demo
 
-🚀 **[View the Live Application](https://frontend-jhomar.vercel.app/)**
+🚀 **[View the Live Application](https://todo-app-jhomar.vercel.app/)**
 
 > The frontend is publicly deployed on **Vercel**. The backend deployment URL is intentionally not included in this README.
 
