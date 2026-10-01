@@ -3,7 +3,7 @@ import { TaskForm } from './TaskForm';
 import type { Todo } from './types';
 import './App.css';
 
-const API_URL = 'http://localhost:5000/api/todos';
+const API_URL = 'https://backend-seven-iota-31.vercel.app/api/todos';
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
