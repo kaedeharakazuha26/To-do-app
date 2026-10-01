@@ -22,6 +22,10 @@ mongoose
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('Todo API is running...');
+});
+
 app.use('/api/todos', todoRoutes);
 
 // Only listen on PORT when running locally (not on Vercel)
