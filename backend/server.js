@@ -33,4 +33,10 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
+app.use(
+  cors({
+    origin: 'https://todo-app-jhomar.vercel.app/', // Or add your new frontend Vercel URL here
+  })
+);
+
 module.exports = app;
